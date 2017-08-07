@@ -3,12 +3,14 @@ import jwt
 import datetime
 
 from django.contrib.auth import get_user_model
+from django.http import Http404
 from rest_framework import permissions, serializers, generics, mixins, views
 from rest_framework.response import Response
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, NotFound
 from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope
 from oauth2_provider.models import get_application_model
 from hkijwt.models import AppToAppPermission
+from users.models import Profile
 
 logger = logging.getLogger(__name__)
 
@@ -100,6 +102,58 @@ class GetJWTView(views.APIView):
         ret = dict(token=encoded, expires_at=request.auth.expires)
         return Response(ret)
 
+
+class InterestedView(views.APIView):
+    def get(self, request):
+        division = request.query_params.get('division', '').strip()
+        yso = request.query_params.get('yso', '').strip()
+
+        if not division and not yso:
+            raise NotFound()
+
+        divisions = [i.strip() for i in division.split(',')] if division else None
+        ysos = [i.strip() for i in yso.split(',')] if yso else None
+
+        qs = Profile.objects.all()
+        if divisions:
+            qs = qs.filter(divisions_of_interest__ocd_id__in=divisions)
+
+        if ysos:
+            qs = qs.filter(ysos_of_interest__yso_id__in=ysos)
+
+        user_uuids = [p.user.uuid for p in qs]
+
+        return Response(user_uuids)
+
+
+class ContactInfoView(views.APIView):
+    def get(self, request):
+        ids_param = request.query_params.get('ids', '').strip()
+        ids = [i.strip() for i in ids_param.split(',')] if ids_param else None
+
+        users = get_user_model().objects.filter(uuid__in=ids)
+
+        data = {}
+        for user in users:
+            profile = None
+            try:
+                profile = user.profile
+
+                data[str(user.uuid)] = {
+                    "email": profile.email if profile else None,
+                    "phone": profile.phone,
+                    "language": profile.language,
+                    "contact_method": profile.contact_method,
+                }
+            except Profile.DoesNotExist:
+                data[str(user.uuid)] = {
+                    "email": None,
+                    "phone": None,
+                    "language": None,
+                    "contact_method": None,
+                }
+
+        return Response(data)
 
 #router = routers.DefaultRouter()
 #router.register(r'users', UserViewSet)

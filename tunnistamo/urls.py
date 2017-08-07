@@ -11,7 +11,7 @@ from django.views.defaults import permission_denied
 from oidc_apis.views import get_api_tokens_view
 from users.views import EmailNeededView, LoginView, LogoutView
 
-from .api import GetJWTView, UserView
+from .api import GetJWTView, UserView, InterestedView, ContactInfoView
 
 
 def show_login(request):
@@ -42,6 +42,8 @@ urlpatterns = [
     url(r'^openid/', include(oidc_provider.urls, namespace='oidc_provider')),
     url(r'^user/(?P<username>[\w.@+-]+)/?$', UserView.as_view()),
     url(r'^user/$', UserView.as_view()),
+    url(r'^interested/$', InterestedView.as_view()),
+    url(r'^contact_info/?$', ContactInfoView.as_view()),
     url(r'^jwt-token/$', GetJWTView.as_view()),
     url(r'^login/$', LoginView.as_view()),
     url(r'^logout/$', LogoutView.as_view()),

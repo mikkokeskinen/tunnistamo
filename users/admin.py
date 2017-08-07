@@ -1,15 +1,28 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from oauth2_provider.models import get_application_model
-from .models import User, LoginMethod
-
+from .models import User, LoginMethod, AdministrativeDivision, YSO, Profile
 
 Application = get_application_model()
+
+
+class AdministrativeDivisionInlineAdmin(admin.TabularInline):
+    model = AdministrativeDivision
+
+
+class YSOInlineAdmin(admin.TabularInline):
+    model = YSO
+
+
+class ProfileAdmin(admin.StackedInline):
+    model = Profile
+    inlines = [AdministrativeDivisionInlineAdmin, YSOInlineAdmin]
 
 
 class ExtendedUserAdmin(UserAdmin):
     search_fields = ['username', 'uuid', 'email', 'first_name', 'last_name']
     list_display = search_fields + ['is_active', 'is_staff', 'is_superuser']
+    inlines = [ProfileAdmin]
 
     def get_fieldsets(self, request, obj=None):
         fieldsets = super(ExtendedUserAdmin, self).get_fieldsets(request, obj)
@@ -52,3 +65,15 @@ class ApplicationAdmin(admin.ModelAdmin):
 
 admin.site.unregister(Application)
 admin.site.register(Application, ApplicationAdmin)
+
+
+class AdministrativeDivisionAdmin(admin.ModelAdmin):
+    model = AdministrativeDivision
+
+admin.site.register(AdministrativeDivision, AdministrativeDivisionAdmin)
+
+
+class YSOAdmin(admin.ModelAdmin):
+    model = YSO
+
+admin.site.register(YSO, YSOAdmin)

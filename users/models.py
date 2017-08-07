@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import uuid
+from django.conf import settings
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from allauth.socialaccount import providers
@@ -55,3 +56,30 @@ class Application(AbstractApplication):
 
     class Meta:
         ordering = ('site_type', 'name')
+
+
+@python_2_unicode_compatible
+class AdministrativeDivision(models.Model):
+    ocd_id = models.CharField(max_length=200, unique=True, db_index=True, null=True,
+                              help_text="Open Civic Data identifier")
+
+    def __str__(self):
+        return self.ocd_id
+
+
+@python_2_unicode_compatible
+class YSO(models.Model):
+    yso_id = models.CharField(max_length=200, unique=True, db_index=True, null=True)
+
+    def __str__(self):
+        return self.yso_id
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    email = models.EmailField(null=True, blank=True)
+    phone = models.CharField(max_length=255, null=True, blank=True)
+    language = models.CharField(max_length=7, choices=settings.LANGUAGES)
+    contact_method = models.CharField(max_length=30, choices=settings.CONTACT_METHODS)
+    divisions_of_interest = models.ManyToManyField(AdministrativeDivision, blank=True)
+    ysos_of_interest = models.ManyToManyField(YSO, blank=True)

@@ -261,6 +261,11 @@ SASS_PROCESSOR_INCLUDE_DIRS = [
 
 SASS_PRECISION = 8
 
+CONTACT_METHODS = (
+    ('email', 'Email'),
+    ('sms', 'SMS'),
+)
+
 # local_settings.py can be used to override environment-specific settings
 # like database and email that differ between development and production.
 local_settings_path = os.path.join(BASE_DIR, "local_settings.py")
