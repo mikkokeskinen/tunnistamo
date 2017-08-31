@@ -57,6 +57,8 @@ INSTALLED_APPS = (
     'adfs_provider',
     'hkijwt',
     'oidc_apis',
+    'munigeo',
+    'thesaurus',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -100,7 +102,7 @@ WSGI_APPLICATION = 'tunnistamo.wsgi.application'
 #
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': 'tunnistamo',
     }
 }
@@ -263,8 +265,13 @@ SASS_PRECISION = 8
 
 CONTACT_METHODS = (
     ('email', 'Email'),
+    ('pushbullet', 'Pushbullet'),
     ('sms', 'SMS'),
 )
+
+PUSHBULLET_ACCESS_TOKEN = ''
+PUSHBULLET_CLIENT_ID = ''
+PUSHBULLET_CLIENT_SECRET = ''
 
 # local_settings.py can be used to override environment-specific settings
 # like database and email that differ between development and production.

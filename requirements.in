@@ -17,3 +17,5 @@ django-npm
 libsass
 django-compressor
 django-sass-processor
+django-munigeo
+django-thesaurus

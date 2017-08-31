@@ -1,8 +1,11 @@
 import logging
+from collections import defaultdict
+
 import jwt
 import datetime
 
 from django.contrib.auth import get_user_model
+from django.db.models import Q
 from django.http import Http404
 from rest_framework import permissions, serializers, generics, mixins, views
 from rest_framework.response import Response
@@ -114,12 +117,24 @@ class InterestedView(views.APIView):
         divisions = [i.strip() for i in division.split(',')] if division else None
         ysos = [i.strip() for i in yso.split(',')] if yso else None
 
-        qs = Profile.objects.all()
+        qs = Profile.objects.all().select_related('user')
         if divisions:
             qs = qs.filter(divisions_of_interest__ocd_id__in=divisions)
 
         if ysos:
-            qs = qs.filter(ysos_of_interest__yso_id__in=ysos)
+            prefix_code_map = defaultdict(list)
+            for yso in ysos:
+                try:
+                    (prefix, code) = yso.split(':')
+                    prefix_code_map[prefix].append(code)
+                except ValueError:
+                    pass
+
+            q = Q()
+            for prefix, codes in prefix_code_map.items():
+                q |= Q(concepts_of_interest__code__in=codes, concepts_of_interest__vocabulary__prefix=prefix)
+
+            qs = qs.filter(q)
 
         user_uuids = [p.user.uuid for p in qs]
 
@@ -135,12 +150,12 @@ class ContactInfoView(views.APIView):
 
         data = {}
         for user in users:
-            profile = None
             try:
                 profile = user.profile
 
                 data[str(user.uuid)] = {
                     "email": profile.email if profile else None,
+                    "pushbullet": profile.pushbullet_access_token,
                     "phone": profile.phone,
                     "language": profile.language,
                     "contact_method": profile.contact_method,
@@ -148,6 +163,7 @@ class ContactInfoView(views.APIView):
             except Profile.DoesNotExist:
                 data[str(user.uuid)] = {
                     "email": None,
+                    "pushbullet": None,
                     "phone": None,
                     "language": None,
                     "contact_method": None,

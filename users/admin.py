@@ -1,22 +1,24 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
+from munigeo.models import AdministrativeDivision
 from oauth2_provider.models import get_application_model
-from .models import User, LoginMethod, AdministrativeDivision, YSO, Profile
+
+from .models import User, LoginMethod, Profile
 
 Application = get_application_model()
 
 
-class AdministrativeDivisionInlineAdmin(admin.TabularInline):
-    model = AdministrativeDivision
-
-
-class YSOInlineAdmin(admin.TabularInline):
-    model = YSO
-
-
 class ProfileAdmin(admin.StackedInline):
     model = Profile
-    inlines = [AdministrativeDivisionInlineAdmin, YSOInlineAdmin]
+    raw_id_fields = ('concepts_of_interest', )
+
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        if db_field.name == "divisions_of_interest":
+            kwargs["queryset"] = AdministrativeDivision.objects.filter(type__type='peruspiiri')
+
+        formfield = super(ProfileAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
+
+        return formfield
 
 
 class ExtendedUserAdmin(UserAdmin):
@@ -65,15 +67,3 @@ class ApplicationAdmin(admin.ModelAdmin):
 
 admin.site.unregister(Application)
 admin.site.register(Application, ApplicationAdmin)
-
-
-class AdministrativeDivisionAdmin(admin.ModelAdmin):
-    model = AdministrativeDivision
-
-admin.site.register(AdministrativeDivision, AdministrativeDivisionAdmin)
-
-
-class YSOAdmin(admin.ModelAdmin):
-    model = YSO
-
-admin.site.register(YSO, YSOAdmin)

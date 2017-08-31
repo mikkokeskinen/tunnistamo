@@ -7,9 +7,10 @@ from django.contrib import admin
 from django.contrib.staticfiles import views as static_views
 from django.http import HttpResponse
 from django.views.defaults import permission_denied
+from users.views import get_concepts
 
 from oidc_apis.views import get_api_tokens_view
-from users.views import EmailNeededView, LoginView, LogoutView
+from users.views import EmailNeededView, LoginView, LogoutView, PushbulletView, ProfileView
 
 from .api import GetJWTView, UserView, InterestedView, ContactInfoView
 
@@ -48,6 +49,10 @@ urlpatterns = [
     url(r'^login/$', LoginView.as_view()),
     url(r'^logout/$', LogoutView.as_view()),
     url(r'^email-needed/$', EmailNeededView.as_view(), name='email_needed'),
+    url(r'^profile/$', ProfileView.as_view(), name='profile'),
+    url(r'^pushbullet/$', PushbulletView.as_view(), name='pushbullet'),
+
+    url(r'^_get_concepts/$', get_concepts, name='_get_concepts'),
 ]
 
 if settings.DEBUG:

@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}{% endblock %}
+
+{% block content %}
+
+{% if not profile or not profile.pushbullet_access_token %}
+    <p class="doc">
+      Voit liittää Pushbullet tunnuksesi napsauttamalla alla olevaa nappia
+    </p>
+
+    <div class="hel-login-methods">
+      <a href="{{ pushbullet_url }}"
+         class="btn btn-block btn-social btn-primary"
+         style="background-color: #4ab367; border-color: #4ab367;">
+          <span class="ext-icon">
+    {% comment %}
+              <img src="https://lh4.ggpht.com/FmtkVY1R6oJ3MtbggSzUaZiteJqDmuHeA3m5ycrFM2tDtHk6Hk3pyCPrpfYyIQUwtgXA=w20" />
+    {% endcomment %}
+          </span>
+          Pushbullet
+      </a>
+      <div class="short-description">
+    {% comment %}
+        Hyväksy...
+    {% endcomment %}
+      </div>
+    </div>
+{% else %}
+    <p class="doc">
+        Pushbullet on jo liitetty.
+    </p>
+{% endif %}
+
+{% endblock %}

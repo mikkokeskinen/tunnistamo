@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+    <script type="">
+        var CONCEPTS_URL = '{% url '_get_concepts' %}';
+    </script>
+    <script type="text/javascript" src="//code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="{% static 'users/js/profile_edit.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'users/css/profile_edit.css' %}">
+{% endblock %}
+
+{% block content %}
+
+    <h1>Osallisuusprofiili</h1>
+
+    <p>
+        <b>Käyttäjätunnus:</b> {{ user.username }}
+    </p>
+
+    <div>
+        <form action="" method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+
+            <div class="row">
+                <div class="col-sm-5">
+                    Concepts:
+                    <ul class="list-group" id="concept_list">
+                    </ul>
+                </div>
+                <div class="col-sm-1">
+                </div>
+                <div class="col-sm-5">
+                    Selected (click to remove):
+                    <ul class="list-group" id="selected_concepts">
+                    </ul>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-11">
+                    <ul class="breadcrumb" id="breadcrumb">
+                    </ul>
+                </div>
+            </div>
+
+            <input type="submit" value="Tallenna">
+        </form>
+    </div>
+
+{% endblock %}
