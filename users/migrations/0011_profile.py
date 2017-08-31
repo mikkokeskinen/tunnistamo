@@ -10,7 +10,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('munigeo', '0005_auto_20170829_0644'),
+        ('munigeo', '0003_add_modified_time_to_address_and_street'),
         ('thesaurus', '0001_initial'),
         ('users', '0010_add_fields_to_users_applications'),
     ]

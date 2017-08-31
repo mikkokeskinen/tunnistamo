@@ -17,5 +17,5 @@ django-npm
 libsass
 django-compressor
 django-sass-processor
-django-munigeo
+-e git+git://github.com/City-of-Helsinki/django-munigeo.git#egg=django-munigeo
 django-thesaurus
