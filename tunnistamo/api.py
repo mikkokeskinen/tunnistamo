@@ -1,5 +1,6 @@
 import logging
 from collections import defaultdict
+from urllib.parse import urlparse
 
 import jwt
 import datetime
@@ -8,6 +9,9 @@ from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.http import Http404
 from rest_framework import permissions, serializers, generics, mixins, views
+from rest_framework.authentication import BasicAuthentication, SessionAuthentication
+from rest_framework.decorators import permission_classes, authentication_classes, api_view
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied, NotFound
 from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope
@@ -106,70 +110,91 @@ class GetJWTView(views.APIView):
         return Response(ret)
 
 
-class InterestedView(views.APIView):
-    def get(self, request):
-        division = request.query_params.get('division', '').strip()
-        yso = request.query_params.get('yso', '').strip()
+@api_view(['GET', 'POST'])
+@authentication_classes((SessionAuthentication, BasicAuthentication))
+@permission_classes((IsAuthenticated,))
+def interested(request):
+    if request.method == 'POST':
+        divisions = request.POST.getlist('divisions', [])
+        yso_strings = request.POST.getlist('yso', [])
+    else:
+        division_param = request.query_params.get('division', '').strip()
+        yso_param = request.query_params.get('yso', '').strip()
 
-        if not division and not yso:
-            raise NotFound()
+        divisions = [i.strip() for i in division_param.split(',')] if division_param else None
+        yso_strings = [i.strip() for i in yso_param.split(',')] if yso_param else []
 
-        divisions = [i.strip() for i in division.split(',')] if division else None
-        ysos = [i.strip() for i in yso.split(',')] if yso else None
+    ysos = []
+    for yso_string in yso_strings:
+        # Use only the last path of the keyword string
+        # e.g. https://api.hel.fi/linkedevents/v1/keyword/yso:p1235/?format=json -> yso:p1235
+        parsed = urlparse(yso_string)
+        ysos.append(parsed.path.strip('/').split('/')[-1])
 
-        qs = Profile.objects.all().select_related('user')
-        if divisions:
-            qs = qs.filter(divisions_of_interest__ocd_id__in=divisions)
+    if not divisions and not ysos:
+        raise NotFound()
 
-        if ysos:
-            prefix_code_map = defaultdict(list)
-            for yso in ysos:
-                try:
-                    (prefix, code) = yso.split(':')
-                    prefix_code_map[prefix].append(code)
-                except ValueError:
-                    pass
+    qs = Profile.objects.all().select_related('user')
+    if divisions:
+        qs = qs.filter(divisions_of_interest__ocd_id__in=divisions)
 
-            q = Q()
-            for prefix, codes in prefix_code_map.items():
-                q |= Q(concepts_of_interest__code__in=codes, concepts_of_interest__vocabulary__prefix=prefix)
+    if ysos:
+        prefix_code_map = defaultdict(list)
+        for yso_param in ysos:
+            try:
+                (prefix, code) = yso_param.split(':')
+                prefix_code_map[prefix].append(code)
+            except ValueError:
+                pass
 
-            qs = qs.filter(q)
+        q = Q()
+        for prefix, codes in prefix_code_map.items():
+            q |= Q(concepts_of_interest__code__in=codes, concepts_of_interest__vocabulary__prefix=prefix)
 
-        user_uuids = [p.user.uuid for p in qs]
+        qs = qs.filter(q)
 
-        return Response(user_uuids)
+    user_uuids = [p.user.uuid for p in qs]
+
+    return Response(user_uuids)
 
 
-class ContactInfoView(views.APIView):
-    def get(self, request):
+@api_view(['GET', 'POST'])
+@authentication_classes((SessionAuthentication, BasicAuthentication))
+@permission_classes((IsAuthenticated,))
+def contact_info(request):
+    if request.method == 'POST':
+        ids = request.POST.getlist('ids', [])
+    else:
         ids_param = request.query_params.get('ids', '').strip()
         ids = [i.strip() for i in ids_param.split(',')] if ids_param else None
 
-        users = get_user_model().objects.filter(uuid__in=ids)
+    if not ids:
+        raise NotFound()
 
-        data = {}
-        for user in users:
-            try:
-                profile = user.profile
+    users = get_user_model().objects.filter(uuid__in=ids)
 
-                data[str(user.uuid)] = {
-                    "email": profile.email if profile else None,
-                    "pushbullet": profile.pushbullet_access_token,
-                    "phone": profile.phone,
-                    "language": profile.language,
-                    "contact_method": profile.contact_method,
-                }
-            except Profile.DoesNotExist:
-                data[str(user.uuid)] = {
-                    "email": None,
-                    "pushbullet": None,
-                    "phone": None,
-                    "language": None,
-                    "contact_method": None,
-                }
+    data = {}
+    for user in users:
+        try:
+            profile = user.profile
 
-        return Response(data)
+            data[str(user.uuid)] = {
+                "email": profile.email if profile else None,
+                "pushbullet": profile.pushbullet_access_token,
+                "phone": profile.phone,
+                "language": profile.language,
+                "contact_method": profile.contact_method,
+            }
+        except Profile.DoesNotExist:
+            data[str(user.uuid)] = {
+                "email": None,
+                "pushbullet": None,
+                "phone": None,
+                "language": None,
+                "contact_method": None,
+            }
+
+    return Response(data)
 
 #router = routers.DefaultRouter()
 #router.register(r'users', UserViewSet)

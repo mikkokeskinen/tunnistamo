@@ -12,7 +12,7 @@ from users.views import get_concepts
 from oidc_apis.views import get_api_tokens_view
 from users.views import EmailNeededView, LoginView, LogoutView, PushbulletView, ProfileView
 
-from .api import GetJWTView, UserView, InterestedView, ContactInfoView
+from .api import GetJWTView, UserView, contact_info, interested
 
 
 def show_login(request):
@@ -43,8 +43,8 @@ urlpatterns = [
     url(r'^openid/', include(oidc_provider.urls, namespace='oidc_provider')),
     url(r'^user/(?P<username>[\w.@+-]+)/?$', UserView.as_view()),
     url(r'^user/$', UserView.as_view()),
-    url(r'^interested/$', InterestedView.as_view()),
-    url(r'^contact_info/?$', ContactInfoView.as_view()),
+    url(r'^interested/$', interested, name="interested"),
+    url(r'^contact_info/?$', contact_info, name="contact_info"),
     url(r'^jwt-token/$', GetJWTView.as_view()),
     url(r'^login/$', LoginView.as_view()),
     url(r'^logout/$', LogoutView.as_view()),
