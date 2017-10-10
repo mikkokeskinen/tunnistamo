@@ -64,6 +64,7 @@ class Profile(models.Model):
     email = models.EmailField(null=True, blank=True)
     phone = models.CharField(max_length=255, null=True, blank=True)
     pushbullet_access_token = models.CharField(max_length=255, null=True, blank=True)
+    firebase_token = models.CharField(max_length=255, null=True, blank=True)
     language = models.CharField(max_length=7, choices=settings.LANGUAGES)
     contact_method = models.CharField(max_length=30, choices=settings.CONTACT_METHODS)
     divisions_of_interest = models.ManyToManyField(AdministrativeDivision, blank=True)

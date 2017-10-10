@@ -94,6 +94,7 @@ def contact_info(request):
             data[str(user.uuid)] = {
                 "email": profile.email if profile else None,
                 "pushbullet": profile.pushbullet_access_token,
+                "firebase": profile.firebase_token,
                 "phone": profile.phone,
                 "language": profile.language,
                 "contact_method": profile.contact_method,
@@ -102,6 +103,7 @@ def contact_info(request):
             data[str(user.uuid)] = {
                 "email": None,
                 "pushbullet": None,
+                "firebase": None,
                 "phone": None,
                 "language": None,
                 "contact_method": None,
