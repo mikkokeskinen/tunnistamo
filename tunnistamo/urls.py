@@ -12,7 +12,8 @@ from users.views import get_concepts
 from oidc_apis.views import get_api_tokens_view
 from users.views import EmailNeededView, LoginView, LogoutView, PushbulletView, ProfileView
 
-from .api import GetJWTView, UserView, contact_info, interested
+from .api import GetJWTView, UserView
+from .profile_api import interested, contact_info, OwnProfileView
 
 
 def show_login(request):
@@ -50,6 +51,7 @@ urlpatterns = [
     url(r'^logout/$', LogoutView.as_view()),
     url(r'^email-needed/$', EmailNeededView.as_view(), name='email_needed'),
     url(r'^profile/$', ProfileView.as_view(), name='profile'),
+    url(r'^own-profile/$', OwnProfileView.as_view(), name='own_profile'),
     url(r'^pushbullet/$', PushbulletView.as_view(), name='pushbullet'),
 
     url(r'^_get_concepts/$', get_concepts, name='_get_concepts'),
