@@ -61,7 +61,7 @@
     $.ajax({
       url: CONCEPTS_URL,
       data: {
-        'vocabulary_id': 11,
+        'vocabulary_id': VOCABULARY_ID,
         'parent_id': parentId,
         'ids': ids
       }
@@ -161,7 +161,9 @@
     var listEl = $('#concept_list');
     var selectedEl = $('#selected_concepts');
 
-    get_and_view_concepts(selectedEl, selectedIds, null);
+    if (selectedIds) {
+      get_and_view_concepts(selectedEl, selectedIds, null);
+    }
     get_and_view_concepts(listEl, null, null);
     updateBreadcrumb();
 

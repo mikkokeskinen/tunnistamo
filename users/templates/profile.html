@@ -7,10 +7,10 @@
 {{ block.super }}
     <script type="">
         var CONCEPTS_URL = '{% url '_get_concepts' %}';
+        var VOCABULARY_ID = {{ vocabulary_id|default:"null" }};
     </script>
     <script type="text/javascript" src="//code.jquery.com/jquery-3.2.1.min.js"></script>
     <script type="text/javascript" src="{% static 'users/js/profile_edit.js' %}"></script>
-    <link rel="stylesheet" type="text/css" href="{% static 'users/css/profile_edit.css' %}">
 {% endblock %}
 
 {% block content %}

@@ -68,8 +68,13 @@ class ManyToManyRawIdWidget(ForeignKeyRawIdWidget):
 
 
 class ProfileForm(forms.ModelForm):
-    divisions_of_interest = CustomLabelField(queryset=AdministrativeDivision.objects.filter(type__type='district'))
-    concepts_of_interest = forms.ModelMultipleChoiceField(queryset=Concept.objects.all(), widget=ManyToManyRawIdWidget(Profile._meta.get_field("concepts_of_interest").rel))
+    divisions_of_interest = CustomLabelField(queryset=AdministrativeDivision.objects.filter(type__type='district'),
+                                             required=False)
+    concepts_of_interest = forms.ModelMultipleChoiceField(
+        queryset=Concept.objects.all(),
+        widget=ManyToManyRawIdWidget(Profile._meta.get_field("concepts_of_interest").rel),
+        required=False
+    )
 
     class Meta:
         model = Profile

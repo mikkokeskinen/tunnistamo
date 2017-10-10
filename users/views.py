@@ -17,7 +17,7 @@ from allauth.socialaccount import providers
 from django.views.generic.detail import SingleObjectTemplateResponseMixin
 from django.views.generic.edit import BaseUpdateView
 from oauth2_provider.models import get_application_model
-from thesaurus.models import Concept, Member
+from thesaurus.models import Member, Vocabulary
 
 from users.forms import ProfileForm
 from .models import LoginMethod, Profile
@@ -161,6 +161,16 @@ class ProfileView(LoginRequiredMixin, SingleObjectTemplateResponseMixin, BaseUpd
     form_class = ProfileForm
     model = Profile
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # TODO: Make the chosen vocabulary configurable
+        try:
+            context['vocabulary_id'] = Vocabulary.objects.get(prefix="yso").id
+        except (Vocabulary.DoesNotExist, Vocabulary.MultipleObjectsReturned):
+            pass
+
+        return context
+
     def get_profile(self):
         profile = None
         if self.request.user.is_authenticated():
@@ -168,7 +178,7 @@ class ProfileView(LoginRequiredMixin, SingleObjectTemplateResponseMixin, BaseUpd
 
         return profile
 
-    def get_object(self):
+    def get_object(self, queryset=None):
         return self.get_profile()
 
     def form_valid(self, form):
