@@ -66,7 +66,7 @@ def interested(request):
 
         qs = qs.filter(q)
 
-    user_uuids = [p.user.uuid for p in qs]
+    user_uuids = {p.user.uuid for p in qs}
 
     return Response(user_uuids)
 
