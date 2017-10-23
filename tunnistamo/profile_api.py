@@ -150,12 +150,9 @@ class ConceptRelatedField(RelatedField):
         return '{}:{}'.format(value.vocabulary.prefix, value.code)
 
     def to_internal_value(self, data):
-        (prefix, code) = data.split(':')
-
-        if not prefix or not code:
-            self.fail('incorrect_type')
-
         try:
+            (prefix, code) = data.split(':')
+
             return Concept.objects.get(vocabulary__prefix=prefix, code=code)
         except Concept.DoesNotExist:
             self.fail('does_not_exist', value=data)

@@ -267,6 +267,7 @@ CONTACT_METHODS = (
     ('email', 'Email'),
     ('pushbullet', 'Pushbullet'),
     ('sms', 'SMS'),
+    ('firebase', 'Firebase'),
 )
 
 PUSHBULLET_ACCESS_TOKEN = ''
