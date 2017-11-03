@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import uuid
 from django.conf import settings
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from allauth.socialaccount import providers
@@ -69,3 +70,4 @@ class Profile(models.Model):
     contact_method = models.CharField(max_length=30, choices=settings.CONTACT_METHODS)
     divisions_of_interest = models.ManyToManyField(AdministrativeDivision, blank=True)
     concepts_of_interest = models.ManyToManyField(Concept, blank=True)
+    preferences = JSONField(null=True, blank=True)
